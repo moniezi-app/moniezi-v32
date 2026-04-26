@@ -774,7 +774,7 @@ class PageErrorBoundary extends React.Component<
   }
 }
 
-const CUSTOMER_VERSION = "32.1.0"; // v32.1.0: Equity demo, guided issuance, and reservations
+const CUSTOMER_VERSION = "32.2.2"; // v32.2.2: Equity tabs light-mode contrast hotfix
 const LICENSE_STORAGE_KEY = "moniezi_license_v1";
 const DEVICE_ID_STORAGE_KEY = "moniezi_device_id_v1";
 const OWNER_LICENSE_KEY = "vgkey";

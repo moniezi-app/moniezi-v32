@@ -902,13 +902,13 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
                   type="button"
                   onClick={() => setActiveSection(item.id)}
                   aria-pressed={active}
-                  className={`min-h-[3.25rem] rounded-xl px-2 text-center text-[13px] sm:text-sm font-black leading-tight transition-all ${
+                  className={`moniezi-equity-primary-tab ${active ? 'is-active' : 'is-inactive'} min-h-[3.25rem] rounded-xl px-2 text-center text-[13px] sm:text-sm font-black leading-tight transition-all ${
                     active
                       ? '!bg-slate-950 !text-white dark:!bg-white dark:!text-slate-950 shadow-md shadow-slate-950/10 dark:shadow-black/30'
                       : '!bg-transparent !text-slate-950 dark:!text-slate-100 hover:!bg-slate-100 dark:hover:!bg-slate-900'
                   }`}
                 >
-                  <span className="block whitespace-normal">{item.label}</span>
+                  <span className="moniezi-equity-primary-tab-label block whitespace-normal">{item.label}</span>
                 </button>
               );
             })}

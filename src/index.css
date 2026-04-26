@@ -332,3 +332,43 @@ html.theme-light .ring-gray-300 {
   background: transparent;
   cursor: default;
 }
+
+/* v32.2.2 Equity segmented-tab contrast hotfix.
+   These explicit classes override MONIEZI's global light-mode button/text rules,
+   which force button text dark and caused selected Equity tabs to become unreadable. */
+.moniezi-equity-primary-tab,
+.moniezi-equity-primary-tab .moniezi-equity-primary-tab-label {
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.theme-light .moniezi-equity-primary-tab.is-active,
+html.theme-light .moniezi-equity-primary-tab.is-active .moniezi-equity-primary-tab-label,
+html:not(.dark) .moniezi-equity-primary-tab.is-active,
+html:not(.dark) .moniezi-equity-primary-tab.is-active .moniezi-equity-primary-tab-label {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html.theme-light .moniezi-equity-primary-tab.is-inactive,
+html.theme-light .moniezi-equity-primary-tab.is-inactive .moniezi-equity-primary-tab-label,
+html:not(.dark) .moniezi-equity-primary-tab.is-inactive,
+html:not(.dark) .moniezi-equity-primary-tab.is-inactive .moniezi-equity-primary-tab-label {
+  color: #020617 !important;
+  -webkit-text-fill-color: #020617 !important;
+}
+
+html.dark .moniezi-equity-primary-tab.is-active,
+html.dark .moniezi-equity-primary-tab.is-active .moniezi-equity-primary-tab-label,
+.dark .moniezi-equity-primary-tab.is-active,
+.dark .moniezi-equity-primary-tab.is-active .moniezi-equity-primary-tab-label {
+  color: #020617 !important;
+  -webkit-text-fill-color: #020617 !important;
+}
+
+html.dark .moniezi-equity-primary-tab.is-inactive,
+html.dark .moniezi-equity-primary-tab.is-inactive .moniezi-equity-primary-tab-label,
+.dark .moniezi-equity-primary-tab.is-inactive,
+.dark .moniezi-equity-primary-tab.is-inactive .moniezi-equity-primary-tab-label {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
