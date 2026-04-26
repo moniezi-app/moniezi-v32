@@ -774,7 +774,7 @@ class PageErrorBoundary extends React.Component<
   }
 }
 
-const CUSTOMER_VERSION = "32.0.0"; // v32.0.0: Company Equity Register module
+const CUSTOMER_VERSION = "32.1.0"; // v32.1.0: Equity demo, guided issuance, and reservations
 const LICENSE_STORAGE_KEY = "moniezi_license_v1";
 const DEVICE_ID_STORAGE_KEY = "moniezi_device_id_v1";
 const OWNER_LICENSE_KEY = "vgkey";

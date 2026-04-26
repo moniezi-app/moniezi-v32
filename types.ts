@@ -276,6 +276,28 @@ export interface EquitySafeInstrument {
   notes?: string;
 }
 
+
+export type EquityReservationStatus = 'interested' | 'reserved' | 'confirmed' | 'declined' | 'converted';
+export type EquityReservationInstrument = 'common_stock' | 'safe' | 'convertible_note' | 'undecided';
+
+export interface EquityInvestmentReservation {
+  id: string;
+  date: string;
+  investorName: string;
+  email?: string;
+  phone?: string;
+  entityName?: string;
+  desiredAmount: number;
+  instrumentType: EquityReservationInstrument;
+  status: EquityReservationStatus;
+  followUpDate?: string;
+  signatureName?: string;
+  source?: 'manual' | 'investor_form';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface EquityCapTableRow {
   stakeholderId: string;
   stakeholderName: string;
@@ -293,6 +315,7 @@ export interface CompanyEquityState {
   stakeholders: EquityStakeholder[];
   issuances: EquityIssuance[];
   safes: EquitySafeInstrument[];
+  reservations: EquityInvestmentReservation[];
 }
 
 export interface Notification {
