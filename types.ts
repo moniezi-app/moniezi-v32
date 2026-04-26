@@ -279,6 +279,7 @@ export interface EquitySafeInstrument {
 
 export type EquityReservationStatus = 'interested' | 'reserved' | 'confirmed' | 'declined' | 'converted';
 export type EquityReservationInstrument = 'common_stock' | 'safe' | 'convertible_note' | 'undecided';
+export type EquityInvestorPackageStatus = 'draft' | 'ready_to_send' | 'sent' | 'opened' | 'signed' | 'expired' | 'voided';
 
 export interface EquityInvestmentReservation {
   id: string;
@@ -293,6 +294,26 @@ export interface EquityInvestmentReservation {
   followUpDate?: string;
   signatureName?: string;
   source?: 'manual' | 'investor_form';
+  packageStatus?: EquityInvestorPackageStatus;
+  packageToken?: string;
+  packageTitle?: string;
+  packagePreparedFor?: string;
+  packageExpirationDate?: string;
+  packagePrivateMessage?: string;
+  packageOfferingSummary?: string;
+  packageMajorTerms?: string;
+  packageRiskText?: string;
+  packageMinimumInvestment?: number;
+  packagePricePerShare?: number;
+  packageEstimatedShares?: number;
+  packageLinkPlaceholder?: string;
+  packageLastPreviewedAt?: string;
+  packageSentAt?: string;
+  packageOpenedAt?: string;
+  packageSignedAt?: string;
+  consentElectronicRecords?: boolean;
+  acknowledgmentIndicationOnly?: boolean;
+  acknowledgmentRisk?: boolean;
   notes?: string;
   createdAt: string;
   updatedAt: string;

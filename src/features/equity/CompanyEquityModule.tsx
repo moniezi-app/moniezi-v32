@@ -3,11 +3,17 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle,
+  Copy,
   Download,
   Edit3,
+  Eye,
   FileText,
   Landmark,
+  Link2,
+  Mail,
+  PenLine,
   Plus,
+  Send,
   Shield,
   Trash2,
   Users,
@@ -16,6 +22,7 @@ import type {
   CompanyEquityState,
   EquityConsiderationType,
   EquityInvestmentReservation,
+  EquityInvestorPackageStatus,
   EquityIssuance,
   EquityIssuanceStatus,
   EquityReservationInstrument,
@@ -37,7 +44,7 @@ import {
 } from './equityCore';
 
 type ToastType = 'success' | 'error' | 'info';
-type EquitySection = 'guide' | 'settings' | 'stakeholders' | 'issuance' | 'captable' | 'reservations' | 'safes';
+type EquitySection = 'guide' | 'settings' | 'stakeholders' | 'issuance' | 'captable' | 'packages' | 'reservations' | 'safes';
 
 type Props = {
   equity: CompanyEquityState;
@@ -171,6 +178,170 @@ const formatInstrument = (value: EquityReservationInstrument | undefined) => {
   return 'Undecided';
 };
 
+const packageStatusTone = (status: EquityInvestorPackageStatus | undefined): 'blue' | 'green' | 'amber' | 'red' | 'slate' => {
+  if (status === 'signed') return 'green';
+  if (status === 'sent' || status === 'opened' || status === 'ready_to_send') return 'blue';
+  if (status === 'expired' || status === 'voided') return 'red';
+  if (status === 'draft') return 'amber';
+  return 'slate';
+};
+
+const packageStatusLabel = (status: EquityInvestorPackageStatus | undefined) => {
+  if (status === 'ready_to_send') return 'ready to send';
+  return status || 'draft';
+};
+
+const escapeHtml = (value: unknown) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
+
+const paragraphize = (value: unknown) => String(value || '')
+  .split(/\n+/)
+  .map(line => line.trim())
+  .filter(Boolean);
+
+const createPackageToken = () => newId('pkg').replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
+
+const defaultOfferingSummary = (companyName: string, instrument: EquityReservationInstrument | undefined) => {
+  const instrumentLabel = formatInstrument(instrument).toLowerCase();
+  return `${companyName || 'The company'} is preparing a private indication-of-interest package for a potential ${instrumentLabel} investment. This page is intended for invited family, friends, and known private contacts only.`;
+};
+
+const defaultMajorTerms = (symbol: string, instrument: EquityReservationInstrument | undefined, amount: unknown, price: unknown) => {
+  const desired = toNumber(amount);
+  const pricePerShare = toNumber(price);
+  const estimatedShares = instrument === 'common_stock' && pricePerShare > 0 ? Math.floor(desired / pricePerShare) : 0;
+  const priceLine = instrument === 'common_stock' && pricePerShare > 0
+    ? `Indicative price per share: ${money(pricePerShare, symbol)}. Estimated shares at the reserved amount: ${estimatedShares.toLocaleString()}.`
+    : 'Final share amount, conversion terms, or instrument terms will be confirmed in final company documents.';
+  return `Indication amount: ${money(desired, symbol)}.\nInstrument: ${formatInstrument(instrument)}.\n${priceLine}\nThis is not final acceptance by the company and does not itself issue shares.`;
+};
+
+const defaultRiskText = () => 'Private-company investments are speculative and involve risk, including possible loss of the full investment. This reservation is subject to company acceptance, final documentation, payment instructions, corporate approval, and applicable securities-law compliance.';
+
+const emptyInvestorPackage = (companyName = ''): Partial<EquityInvestmentReservation> => ({
+  date: todayIso(),
+  investorName: '',
+  email: '',
+  phone: '',
+  entityName: '',
+  desiredAmount: 0,
+  instrumentType: 'common_stock',
+  status: 'interested',
+  followUpDate: '',
+  signatureName: '',
+  source: 'manual',
+  packageStatus: 'draft',
+  packageToken: '',
+  packageTitle: 'Private Investment Reservation',
+  packagePreparedFor: '',
+  packageExpirationDate: '',
+  packagePrivateMessage: '',
+  packageOfferingSummary: defaultOfferingSummary(companyName || 'The company', 'common_stock'),
+  packageMajorTerms: defaultMajorTerms('$', 'common_stock', 0, 0.25),
+  packageRiskText: defaultRiskText(),
+  packageMinimumInvestment: 5000,
+  packagePricePerShare: 0.25,
+  packageEstimatedShares: 0,
+  packageLinkPlaceholder: '',
+  consentElectronicRecords: false,
+  acknowledgmentIndicationOnly: false,
+  acknowledgmentRisk: false,
+  notes: '',
+});
+
+const buildPackageLink = (token?: string) => {
+  const cleanToken = token || 'preview-token';
+  if (typeof window === 'undefined') return `https://your-domain.com/investor-reservation/${cleanToken}`;
+  return `${window.location.origin}${window.location.pathname}#/investor-reservation/${cleanToken}`;
+};
+
+const packageEstimatedShares = (record: Partial<EquityInvestmentReservation>) => {
+  if (record.instrumentType !== 'common_stock') return 0;
+  const price = toNumber(record.packagePricePerShare);
+  if (price <= 0) return 0;
+  return Math.floor(toNumber(record.desiredAmount) / price);
+};
+
+const buildPackageHtml = (record: Partial<EquityInvestmentReservation>, companyName: string, symbol: string) => {
+  const estimatedShares = packageEstimatedShares(record);
+  const terms = paragraphize(record.packageMajorTerms || defaultMajorTerms(symbol, record.instrumentType, record.desiredAmount, record.packagePricePerShare));
+  const risk = paragraphize(record.packageRiskText || defaultRiskText());
+  const summary = paragraphize(record.packageOfferingSummary || defaultOfferingSummary(companyName, record.instrumentType));
+  const htmlParagraphs = (lines: string[]) => lines.map(line => `<p>${escapeHtml(line)}</p>`).join('');
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escapeHtml(record.packageTitle || 'Private Investment Reservation')}</title>
+<style>body{margin:0;background:#f1f5f9;color:#0f172a;font-family:Arial,Helvetica,sans-serif}.wrap{max-width:860px;margin:0 auto;padding:24px}.card{background:white;border:1px solid #dbe3ef;border-radius:24px;box-shadow:0 20px 60px rgba(15,23,42,.08);padding:28px;margin:18px 0}.top{background:#0f172a;color:white;border-radius:24px;padding:28px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800;color:#38bdf8}.title{font-size:32px;line-height:1.05;margin:10px 0;font-weight:900}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.box{border:1px solid #dbe3ef;border-radius:16px;padding:14px;background:#f8fafc}.label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#64748b;font-weight:900}.value{font-weight:900;margin-top:5px}.notice{border-left:5px solid #f59e0b;background:#fffbeb;border-radius:14px;padding:14px;margin-top:14px}.sig{height:76px;border-bottom:2px solid #0f172a;display:flex;align-items:flex-end;font-size:24px;font-family:Georgia,serif;padding-bottom:8px}.button{display:block;text-align:center;background:#2563eb;color:white;border-radius:16px;padding:16px;font-weight:900;text-decoration:none;margin-top:18px}@media(max-width:720px){.grid{grid-template-columns:1fr}.title{font-size:26px}.wrap{padding:14px}.card,.top{padding:20px}}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="eyebrow">${escapeHtml(companyName)}</div><div class="title">${escapeHtml(record.packageTitle || 'Private Investment Reservation')}</div><div>Prepared for ${escapeHtml(record.investorName || record.packagePreparedFor || 'Investor')} ${record.packageExpirationDate ? `• expires ${escapeHtml(record.packageExpirationDate)}` : ''}</div></div>
+  <div class="card"><div class="label">Private message</div>${htmlParagraphs(paragraphize(record.packagePrivateMessage || 'Please review the terms below. This is an indication-of-interest package, not final investment acceptance.'))}</div>
+  <div class="card"><div class="label">Reservation summary</div><div class="grid"><div class="box"><div class="label">Investor</div><div class="value">${escapeHtml(record.investorName || 'Not entered')}</div></div><div class="box"><div class="label">Entity</div><div class="value">${escapeHtml(record.entityName || 'Individual / not entered')}</div></div><div class="box"><div class="label">Instrument</div><div class="value">${escapeHtml(formatInstrument(record.instrumentType))}</div></div><div class="box"><div class="label">Desired amount</div><div class="value">${escapeHtml(money(record.desiredAmount, symbol))}</div></div>${record.instrumentType === 'common_stock' ? `<div class="box"><div class="label">Indicative price/share</div><div class="value">${escapeHtml(money(record.packagePricePerShare, symbol))}</div></div><div class="box"><div class="label">Estimated shares</div><div class="value">${escapeHtml(estimatedShares.toLocaleString())}</div></div>` : ''}</div></div>
+  <div class="card"><div class="label">Offering summary</div>${htmlParagraphs(summary)}</div>
+  <div class="card"><div class="label">Major terms</div>${htmlParagraphs(terms)}</div>
+  <div class="card"><div class="label">Acknowledgments</div><div class="notice">I understand this is an indication of interest only, not final company acceptance, not a completed investment, and not issued shares.</div><div class="notice">I consent to receive and sign records electronically for this package.</div><div class="notice">${htmlParagraphs(risk)}</div></div>
+  <div class="card"><div class="label">Typed signature preview</div><div class="sig">${escapeHtml(record.signatureName || record.investorName || '')}</div><p>Date/time will be captured when the future Cloudflare investor portal is connected.</p><a class="button" href="#">Submit reservation — preview only</a></div>
+</div>
+</body>
+</html>`;
+};
+
+function SigningPackagePreview({ record, companyName, currencySymbol }: { record: Partial<EquityInvestmentReservation>; companyName: string; currencySymbol: string }) {
+  const estimatedShares = packageEstimatedShares(record);
+  const summary = paragraphize(record.packageOfferingSummary || defaultOfferingSummary(companyName, record.instrumentType));
+  const terms = paragraphize(record.packageMajorTerms || defaultMajorTerms(currencySymbol, record.instrumentType, record.desiredAmount, record.packagePricePerShare));
+  const risk = paragraphize(record.packageRiskText || defaultRiskText());
+  const displayName = record.investorName || record.packagePreparedFor || 'Investor';
+  return (
+    <div className="rounded-[28px] border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 p-3 sm:p-5">
+      <div className="rounded-[24px] bg-white dark:bg-slate-950 shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-950 text-white p-6 sm:p-8">
+          <div className="text-[11px] font-black uppercase tracking-[0.22em] text-blue-300">{companyName || 'Company'}</div>
+          <h3 className="mt-2 text-3xl font-black leading-tight">{record.packageTitle || 'Private Investment Reservation'}</h3>
+          <div className="mt-3 text-sm font-semibold text-slate-300">Prepared for {displayName}{record.packageExpirationDate ? ` • expires ${record.packageExpirationDate}` : ''}</div>
+        </div>
+        <div className="p-5 sm:p-8 space-y-5">
+          <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-950/20 p-4">
+            <div className="text-xs font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">Private message</div>
+            {paragraphize(record.packagePrivateMessage || 'Please review the terms below. This is an indication-of-interest package, not final investment acceptance.').map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Investor</div><div className="font-black text-slate-950 dark:text-white">{displayName}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Entity</div><div className="font-black text-slate-950 dark:text-white">{record.entityName || 'Individual / not entered'}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Instrument</div><div className="font-black text-slate-950 dark:text-white">{formatInstrument(record.instrumentType)}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Desired amount</div><div className="font-black text-slate-950 dark:text-white">{money(record.desiredAmount, currencySymbol)}</div></div>
+            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Indicative price/share</div><div className="font-black text-slate-950 dark:text-white">{money(record.packagePricePerShare, currencySymbol)}</div></div>}
+            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Estimated shares</div><div className="font-black text-slate-950 dark:text-white">{estimatedShares.toLocaleString()}</div></div>}
+          </div>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Offering summary</div>{summary.map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}</div>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Major terms</div>{terms.map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}</div>
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-3">
+            <div className={labelClass}>Acknowledgments shown to investor</div>
+            <label className="flex gap-3 text-sm font-bold text-slate-700 dark:text-slate-200"><input type="checkbox" checked readOnly /> I consent to receive and sign records electronically.</label>
+            <label className="flex gap-3 text-sm font-bold text-slate-700 dark:text-slate-200"><input type="checkbox" checked readOnly /> I understand this is an indication of interest only and not issued shares.</label>
+            <label className="flex gap-3 text-sm font-bold text-slate-700 dark:text-slate-200"><input type="checkbox" checked readOnly /> I understand private-company investments involve risk.</label>
+            {risk.map((line, idx) => <p key={idx} className="text-sm font-semibold text-amber-900 dark:text-amber-100">{line}</p>)}
+          </div>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+            <div className={labelClass}>Typed signature preview</div>
+            <div className="h-20 border-b-2 border-slate-900 dark:border-slate-200 flex items-end pb-2 font-serif text-2xl text-slate-950 dark:text-white">{record.signatureName || displayName}</div>
+            <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Future online portal will capture submit timestamp and audit details. This v32.2 preview does not replace a securities portal.</div>
+          </div>
+          <button type="button" className="w-full rounded-2xl bg-blue-600 text-white font-black px-5 py-4 flex items-center justify-center gap-2"><PenLine size={18}/> Submit reservation — preview only</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SummaryCard({ label, value, note, icon }: { label: string; value: string; note: string; icon: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
@@ -211,6 +382,11 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
   const [editingSafeId, setEditingSafeId] = useState<string | null>(null);
   const [reservationDraft, setReservationDraft] = useState<Partial<EquityInvestmentReservation>>(emptyReservation());
   const [editingReservationId, setEditingReservationId] = useState<string | null>(null);
+  const companyName = state.profile.legalName || defaultBusinessName || 'Company';
+  const [packageDraft, setPackageDraft] = useState<Partial<EquityInvestmentReservation>>(() => emptyInvestorPackage(defaultBusinessName || 'Company'));
+  const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
+  const [previewPackage, setPreviewPackage] = useState<Partial<EquityInvestmentReservation> | null>(null);
+  const investorPackages = useMemo(() => state.reservations.filter(r => !!(r.packageStatus || r.packageToken || r.packageTitle || r.packageLinkPlaceholder)), [state.reservations]);
 
   const selectedHolder = state.stakeholders.find(s => s.id === issuanceDraft.stakeholderId);
   const selectedShareClass = state.shareClasses.find(c => c.id === issuanceDraft.shareClassId);
@@ -234,6 +410,9 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
     setIssuanceDraft(emptyIssuance('eq_cls_common'));
     setSafeDraft(emptySafe());
     setReservationDraft(emptyReservation());
+    setPackageDraft(emptyInvestorPackage(defaultBusinessName || 'Company'));
+    setEditingPackageId(null);
+    setPreviewPackage(null);
     showToast('Demo equity data loaded.', 'success');
   };
 
@@ -483,6 +662,148 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
     showToast('Reservation deleted.', 'info');
   };
 
+  const packageLinkFor = (record: Partial<EquityInvestmentReservation>) => record.packageLinkPlaceholder || buildPackageLink(record.packageToken || 'preview-token');
+
+  const buildPackageRecord = (draft: Partial<EquityInvestmentReservation>): Omit<EquityInvestmentReservation, 'id' | 'createdAt' | 'updatedAt'> => {
+    const investorName = String(draft.investorName || '').trim();
+    const token = draft.packageToken || createPackageToken();
+    const instrumentType = (draft.instrumentType || 'common_stock') as EquityReservationInstrument;
+    const estimatedShares = instrumentType === 'common_stock' ? packageEstimatedShares(draft) : 0;
+    return {
+      date: draft.date || todayIso(),
+      investorName,
+      email: draft.email || '',
+      phone: draft.phone || '',
+      entityName: draft.entityName || '',
+      desiredAmount: toNumber(draft.desiredAmount),
+      instrumentType,
+      status: (draft.status || 'interested') as EquityReservationStatus,
+      followUpDate: draft.followUpDate || '',
+      signatureName: draft.signatureName || '',
+      source: 'manual',
+      packageStatus: (draft.packageStatus || 'draft') as EquityInvestorPackageStatus,
+      packageToken: token,
+      packageTitle: draft.packageTitle || 'Private Investment Reservation',
+      packagePreparedFor: draft.packagePreparedFor || investorName,
+      packageExpirationDate: draft.packageExpirationDate || '',
+      packagePrivateMessage: draft.packagePrivateMessage || '',
+      packageOfferingSummary: draft.packageOfferingSummary || defaultOfferingSummary(companyName, instrumentType),
+      packageMajorTerms: draft.packageMajorTerms || defaultMajorTerms(currencySymbol, instrumentType, draft.desiredAmount, draft.packagePricePerShare),
+      packageRiskText: draft.packageRiskText || defaultRiskText(),
+      packageMinimumInvestment: draft.packageMinimumInvestment === undefined || draft.packageMinimumInvestment === null ? undefined : toNumber(draft.packageMinimumInvestment),
+      packagePricePerShare: draft.packagePricePerShare === undefined || draft.packagePricePerShare === null ? undefined : toNumber(draft.packagePricePerShare),
+      packageEstimatedShares: estimatedShares,
+      packageLinkPlaceholder: draft.packageLinkPlaceholder || buildPackageLink(token),
+      packageLastPreviewedAt: draft.packageLastPreviewedAt || '',
+      packageSentAt: draft.packageSentAt || '',
+      packageOpenedAt: draft.packageOpenedAt || '',
+      packageSignedAt: draft.packageSignedAt || '',
+      consentElectronicRecords: !!draft.consentElectronicRecords,
+      acknowledgmentIndicationOnly: !!draft.acknowledgmentIndicationOnly,
+      acknowledgmentRisk: !!draft.acknowledgmentRisk,
+      notes: draft.notes || '',
+    };
+  };
+
+  const saveInvestorPackage = () => {
+    const investorName = String(packageDraft.investorName || '').trim();
+    if (!investorName) return showToast('Investor name is required for the signing package.', 'error');
+    if (toNumber(packageDraft.desiredAmount) <= 0) return showToast('Desired investment amount must be greater than zero.', 'error');
+    const now = new Date().toISOString();
+    const payload = buildPackageRecord(packageDraft);
+    onChange(prev => {
+      const normalized = normalizeCompanyEquityState(prev, defaultBusinessName);
+      if (editingPackageId) {
+        return {
+          ...normalized,
+          reservations: normalized.reservations.map(r => r.id === editingPackageId ? { ...r, ...payload, updatedAt: now } : r),
+        };
+      }
+      return {
+        ...normalized,
+        reservations: [{ id: newId('eq_reservation'), ...payload, createdAt: now, updatedAt: now }, ...normalized.reservations],
+      };
+    });
+    setPackageDraft(emptyInvestorPackage(companyName));
+    setEditingPackageId(null);
+    showToast(editingPackageId ? 'Investor signing package updated.' : 'Investor signing package drafted.', 'success');
+  };
+
+  const editInvestorPackage = (record: EquityInvestmentReservation) => {
+    setEditingPackageId(record.id);
+    setPackageDraft({
+      ...record,
+      packageMajorTerms: record.packageMajorTerms || defaultMajorTerms(currencySymbol, record.instrumentType, record.desiredAmount, record.packagePricePerShare),
+      packageOfferingSummary: record.packageOfferingSummary || defaultOfferingSummary(companyName, record.instrumentType),
+      packageRiskText: record.packageRiskText || defaultRiskText(),
+    });
+    setPreviewPackage(record);
+    setActiveSection('packages');
+  };
+
+  const previewInvestorPackage = (record?: Partial<EquityInvestmentReservation>) => {
+    const payload = buildPackageRecord(record || packageDraft);
+    const preview = { id: editingPackageId || 'preview', ...payload, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as EquityInvestmentReservation;
+    setPreviewPackage(preview);
+    if (editingPackageId) {
+      onChange(prev => {
+        const normalized = normalizeCompanyEquityState(prev, defaultBusinessName);
+        return { ...normalized, reservations: normalized.reservations.map(r => r.id === editingPackageId ? { ...r, packageLastPreviewedAt: new Date().toISOString(), updatedAt: new Date().toISOString() } : r) };
+      });
+    }
+  };
+
+  const packageInvitationText = (record: Partial<EquityInvestmentReservation>) => {
+    const link = packageLinkFor(record);
+    return `Hi ${record.investorName || 'there'},\n\n${companyName} prepared a private investment reservation / indication-of-interest package for your review.\n\nReview link: ${link}\n\nThis is only a reservation / indication of interest. It is not final company acceptance, not payment instructions, and not an issued-share record. Final investment documents and company approval remain required.`;
+  };
+
+  const copyInvitation = async (record: Partial<EquityInvestmentReservation>) => {
+    const text = packageInvitationText(record);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Invitation text copied.', 'success');
+    } catch {
+      downloadText(`moniezi_investor_invitation_${todayIso()}.txt`, text, 'text/plain;charset=utf-8');
+      showToast('Clipboard unavailable. Invitation text downloaded instead.', 'info');
+    }
+  };
+
+  const downloadPackageHtml = (record: Partial<EquityInvestmentReservation>) => {
+    const html = buildPackageHtml(record, companyName, currencySymbol);
+    const safeName = String(record.investorName || 'investor').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'investor';
+    downloadText(`moniezi_${safeName}_signing_package_preview_${todayIso()}.html`, html, 'text/html;charset=utf-8');
+  };
+
+  const updatePackageStatus = (id: string, status: EquityInvestorPackageStatus) => {
+    const now = new Date().toISOString();
+    onChange(prev => {
+      const normalized = normalizeCompanyEquityState(prev, defaultBusinessName);
+      return {
+        ...normalized,
+        reservations: normalized.reservations.map(r => {
+          if (r.id !== id) return r;
+          return {
+            ...r,
+            packageStatus: status,
+            status: status === 'signed' ? 'confirmed' : r.status,
+            packageSentAt: status === 'sent' ? now : r.packageSentAt,
+            packageOpenedAt: status === 'opened' ? now : r.packageOpenedAt,
+            packageSignedAt: status === 'signed' ? now : r.packageSignedAt,
+            updatedAt: now,
+          };
+        }),
+      };
+    });
+    showToast(`Package marked ${packageStatusLabel(status)}.`, 'success');
+  };
+
+  const draftPreviewRecord = () => {
+    const payload = buildPackageRecord(packageDraft);
+    return { id: editingPackageId || 'preview', ...payload, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as EquityInvestmentReservation;
+  };
+
+
   const exportCapTableCsv = () => {
     const rows = [
       ['Stakeholder', 'Type', 'Share Class', 'Shares', 'Ownership %', 'Cash Paid'],
@@ -513,8 +834,8 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
 
   const exportReservationsCsv = () => {
     const rows = [
-      ['Date', 'Investor', 'Email', 'Phone', 'Entity', 'Desired Amount', 'Instrument', 'Status', 'Follow-up Date', 'Typed Signature', 'Source', 'Notes'],
-      ...state.reservations.map(r => [r.date, r.investorName, r.email || '', r.phone || '', r.entityName || '', r.desiredAmount, formatInstrument(r.instrumentType), r.status, r.followUpDate || '', r.signatureName || '', r.source || 'manual', r.notes || '']),
+      ['Date', 'Investor', 'Email', 'Phone', 'Entity', 'Desired Amount', 'Instrument', 'Status', 'Package Status', 'Package Link', 'Expires', 'Estimated Shares', 'Follow-up Date', 'Typed Signature', 'Source', 'Notes'],
+      ...state.reservations.map(r => [r.date, r.investorName, r.email || '', r.phone || '', r.entityName || '', r.desiredAmount, formatInstrument(r.instrumentType), r.status, r.packageStatus || '', r.packageLinkPlaceholder || '', r.packageExpirationDate || '', r.packageEstimatedShares || '', r.followUpDate || '', r.signatureName || '', r.source || 'manual', r.notes || '']),
     ];
     downloadText(`moniezi_investment_reservations_${todayIso()}.csv`, toCsv(rows));
   };
@@ -522,6 +843,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
   const navItems: Array<{ id: EquitySection; label: string }> = [
     { id: 'guide', label: 'Guide' },
     { id: 'issuance', label: 'Issue Shares' },
+    { id: 'packages', label: 'Investor Packages' },
     { id: 'reservations', label: 'Reservations' },
     { id: 'stakeholders', label: 'Stakeholders' },
     { id: 'captable', label: 'Cap Table' },
@@ -590,12 +912,13 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <h2 className="text-xl font-black text-slate-950 dark:text-white">Plain-English Workflow</h2>
             <p className={subTextClass}>Use this order when you want to track who received shares and how much they paid.</p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {[
               ['1', 'Add stakeholder', 'Create the person/entity first: founder, investor, advisor, employee, or LLC.'],
               ['2', 'Record issuance', 'Enter date, recipient, share class, shares, price/share, amount paid, certificate, and approval date.'],
               ['3', 'Review cap table', 'Ownership percentage updates only from active issued shares. Cancelled shares do not count.'],
-              ['4', 'Track reservations separately', 'Reservations are interest/commitments only. They are not issued shares until you record an issuance.'],
+              ['4', 'Draft investor package', 'Create a private DocuSign-style preview package before sending a future link.'],
+              ['5', 'Track reservations separately', 'Reservations are interest/commitments only. They are not issued shares until you record an issuance.'],
             ].map(([num, title, body]) => (
               <div key={num} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4">
                 <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">{num}</div>
@@ -746,6 +1069,109 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <button onClick={exportCapTableCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> Cap Table CSV</button>
           </div>
           <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800"><table className="w-full min-w-[760px] text-sm"><thead className="bg-slate-50 dark:bg-slate-900"><tr>{['Stakeholder','Type','Class','Shares','Ownership','Cash Paid'].map(h => <th key={h} className="px-3 py-3 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-200 dark:divide-slate-800">{capRows.length === 0 ? <tr><td colSpan={6} className="px-3 py-6 text-center font-semibold text-slate-500">No outstanding issued shares yet.</td></tr> : capRows.map(row => <tr key={`${row.stakeholderId}-${row.shareClassId}`}><td className="px-3 py-3 font-black text-slate-950 dark:text-white">{row.stakeholderName}</td><td className="px-3 py-3 capitalize">{row.stakeholderType}</td><td className="px-3 py-3">{row.shareClassName}</td><td className="px-3 py-3">{formatShares(row.shares)}</td><td className="px-3 py-3 font-bold">{percent(row.ownershipPct)}</td><td className="px-3 py-3">{money(row.cashPaid, currencySymbol)}</td></tr>)}</tbody></table></div>
+        </section>
+      )}
+
+      {activeSection === 'packages' && (
+        <section className={`${cardClass} p-5 space-y-6`}>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-black text-slate-950 dark:text-white">Investor Link Drafting + Signing Package Preview</h2>
+              <p className={subTextClass}>Draft a DocuSign-style private reservation page for family/friends investors. In v32.2 this creates the owner-side package, preview, placeholder link, invitation text, and downloadable HTML preview.</p>
+            </div>
+            <button onClick={() => setPackageDraft(emptyInvestorPackage(companyName))} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Plus size={16}/> New Package</button>
+          </div>
+
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/20 p-4 flex gap-3">
+            <Link2 size={20} className="text-blue-700 dark:text-blue-300 mt-0.5 flex-shrink-0" />
+            <div className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+              <b>Current scope:</b> this is a private-link drafting and preview workflow. The generated link is a placeholder for the future Cloudflare investor portal. Investors do not see your private cap table, shareholders, certificates, or internal notes.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-black text-slate-950 dark:text-white">Package details</h3>
+                  <p className={subTextClass}>{editingPackageId ? 'Editing saved package.' : 'Create a new invitation/reservation package.'}</p>
+                </div>
+                {editingPackageId && <span className={statusPillClass(packageStatusTone(packageDraft.packageStatus as EquityInvestorPackageStatus | undefined))}>{packageStatusLabel(packageDraft.packageStatus as EquityInvestorPackageStatus | undefined)}</span>}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field label="Package date"><input className={fieldClass} type="date" value={packageDraft.date || todayIso()} onChange={e => setPackageDraft(p => ({ ...p, date: e.target.value }))} /></Field>
+                <Field label="Package status"><select className={fieldClass} value={packageDraft.packageStatus || 'draft'} onChange={e => setPackageDraft(p => ({ ...p, packageStatus: e.target.value as EquityInvestorPackageStatus }))}><option value="draft">Draft</option><option value="ready_to_send">Ready to send</option><option value="sent">Sent</option><option value="opened">Opened</option><option value="signed">Signed</option><option value="expired">Expired</option><option value="voided">Voided</option></select></Field>
+                <Field label="Investor name"><input className={fieldClass} value={packageDraft.investorName || ''} onChange={e => setPackageDraft(p => ({ ...p, investorName: e.target.value, packagePreparedFor: e.target.value, signatureName: e.target.value }))} placeholder="John Smith" /></Field>
+                <Field label="Email"><input className={fieldClass} value={packageDraft.email || ''} onChange={e => setPackageDraft(p => ({ ...p, email: e.target.value }))} placeholder="investor@example.com" /></Field>
+                <Field label="Phone"><input className={fieldClass} value={packageDraft.phone || ''} onChange={e => setPackageDraft(p => ({ ...p, phone: e.target.value }))} placeholder="Optional" /></Field>
+                <Field label="Entity / LLC"><input className={fieldClass} value={packageDraft.entityName || ''} onChange={e => setPackageDraft(p => ({ ...p, entityName: e.target.value }))} placeholder="Optional investing entity" /></Field>
+                <Field label="Desired investment amount"><input className={fieldClass} type="number" inputMode="decimal" value={packageDraft.desiredAmount || ''} onChange={e => setPackageDraft(p => ({ ...p, desiredAmount: toNumber(e.target.value), packageEstimatedShares: packageEstimatedShares({ ...p, desiredAmount: toNumber(e.target.value) }) }))} placeholder="25000" /></Field>
+                <Field label="Instrument"><select className={fieldClass} value={packageDraft.instrumentType || 'common_stock'} onChange={e => setPackageDraft(p => ({ ...p, instrumentType: e.target.value as EquityReservationInstrument }))}><option value="common_stock">Common stock</option><option value="safe">SAFE</option><option value="convertible_note">Convertible note</option><option value="undecided">Undecided</option></select></Field>
+                <Field label="Minimum investment"><input className={fieldClass} type="number" inputMode="decimal" value={packageDraft.packageMinimumInvestment ?? ''} onChange={e => setPackageDraft(p => ({ ...p, packageMinimumInvestment: e.target.value === '' ? undefined : toNumber(e.target.value) }))} placeholder="5000" /></Field>
+                <Field label="Price/share if stock"><input className={fieldClass} type="number" inputMode="decimal" step="0.0001" value={packageDraft.packagePricePerShare ?? ''} onChange={e => setPackageDraft(p => ({ ...p, packagePricePerShare: e.target.value === '' ? undefined : toNumber(e.target.value), packageEstimatedShares: packageEstimatedShares({ ...p, packagePricePerShare: e.target.value === '' ? undefined : toNumber(e.target.value) }) }))} placeholder="0.25" /></Field>
+                <Field label="Expiration date"><input className={fieldClass} type="date" value={packageDraft.packageExpirationDate || ''} onChange={e => setPackageDraft(p => ({ ...p, packageExpirationDate: e.target.value }))} /></Field>
+                <Field label="Typed signature preview"><input className={fieldClass} value={packageDraft.signatureName || ''} onChange={e => setPackageDraft(p => ({ ...p, signatureName: e.target.value }))} placeholder="Investor typed name" /></Field>
+                <div className="md:col-span-2"><Field label="Package title"><input className={fieldClass} value={packageDraft.packageTitle || ''} onChange={e => setPackageDraft(p => ({ ...p, packageTitle: e.target.value }))} placeholder="Private Investment Reservation" /></Field></div>
+                <div className="md:col-span-2"><Field label="Private message"><textarea className={fieldClass} rows={3} value={packageDraft.packagePrivateMessage || ''} onChange={e => setPackageDraft(p => ({ ...p, packagePrivateMessage: e.target.value }))} placeholder="Personal note shown at the top of the signing page." /></Field></div>
+                <div className="md:col-span-2"><Field label="Offering summary"><textarea className={fieldClass} rows={4} value={packageDraft.packageOfferingSummary || ''} onChange={e => setPackageDraft(p => ({ ...p, packageOfferingSummary: e.target.value }))} /></Field></div>
+                <div className="md:col-span-2"><Field label="Major terms"><textarea className={fieldClass} rows={5} value={packageDraft.packageMajorTerms || ''} onChange={e => setPackageDraft(p => ({ ...p, packageMajorTerms: e.target.value }))} /></Field></div>
+                <div className="md:col-span-2"><Field label="Risk / acknowledgment text"><textarea className={fieldClass} rows={4} value={packageDraft.packageRiskText || ''} onChange={e => setPackageDraft(p => ({ ...p, packageRiskText: e.target.value }))} /></Field></div>
+                <div className="md:col-span-2"><Field label="Internal notes"><textarea className={fieldClass} rows={2} value={packageDraft.notes || ''} onChange={e => setPackageDraft(p => ({ ...p, notes: e.target.value }))} placeholder="Private notes; not shown to investor unless copied into message/terms." /></Field></div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button onClick={saveInvestorPackage} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><FileText size={16}/>{editingPackageId ? 'Update Package' : 'Save Draft Package'}</button>
+                <button onClick={() => previewInvestorPackage()} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Eye size={16}/> Preview Page</button>
+                <button onClick={() => copyInvitation(draftPreviewRecord())} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Copy size={16}/> Copy Invite Text</button>
+                <button onClick={() => downloadPackageHtml(draftPreviewRecord())} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Download size={16}/> Download HTML Preview</button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                <div className={labelClass}>Placeholder link</div>
+                <div className="mt-1 break-all text-sm font-bold text-slate-700 dark:text-slate-200">{packageDraft.packageLinkPlaceholder || buildPackageLink(packageDraft.packageToken || 'preview-token')}</div>
+                <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">This link becomes real only after the future Cloudflare portal is connected. For now, use preview/download to review the investor-facing page.</p>
+              </div>
+              <SigningPackagePreview record={previewPackage || draftPreviewRecord()} companyName={companyName} currencySymbol={currencySymbol} />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-black text-slate-950 dark:text-white">Saved Investor Packages</h3>
+                <p className={subTextClass}>These records are also part of the Reservations tracker, but this view focuses on invitation/link/signing workflow status.</p>
+              </div>
+            </div>
+            {investorPackages.length === 0 ? (
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">No investor packages yet.</div>
+            ) : investorPackages.map(r => (
+              <div key={r.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                  <div>
+                    <div className="font-black text-slate-950 dark:text-white">{r.investorName} • {money(r.desiredAmount, currencySymbol)}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2"><span className={statusPillClass(packageStatusTone(r.packageStatus))}>{packageStatusLabel(r.packageStatus)}</span><span className={statusPillClass('slate')}>{formatInstrument(r.instrumentType)}</span>{r.email && <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{r.email}</span>}</div>
+                    <div className="mt-2 break-all text-xs font-semibold text-slate-500 dark:text-slate-400">{packageLinkFor(r)}</div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => editInvestorPackage(r)} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-black flex items-center gap-1"><Edit3 size={14}/> Edit</button>
+                    <button onClick={() => setPreviewPackage(r)} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-black flex items-center gap-1"><Eye size={14}/> Preview</button>
+                    <button onClick={() => copyInvitation(r)} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-black flex items-center gap-1"><Mail size={14}/> Invite</button>
+                    <button onClick={() => downloadPackageHtml(r)} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-black flex items-center gap-1"><Download size={14}/> HTML</button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => updatePackageStatus(r.id, 'sent')} className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300 text-xs font-black flex items-center gap-1"><Send size={14}/> Mark sent</button>
+                  <button onClick={() => updatePackageStatus(r.id, 'opened')} className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300 text-xs font-black">Mark opened</button>
+                  <button onClick={() => updatePackageStatus(r.id, 'signed')} className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300 text-xs font-black">Mark signed</button>
+                  <button onClick={() => updatePackageStatus(r.id, 'voided')} className="px-3 py-2 rounded-xl bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300 text-xs font-black">Void</button>
+                </div>
+                {(r.packageSentAt || r.packageOpenedAt || r.packageSignedAt) && <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">{r.packageSentAt ? `Sent ${r.packageSentAt}` : ''}{r.packageOpenedAt ? ` • Opened ${r.packageOpenedAt}` : ''}{r.packageSignedAt ? ` • Signed ${r.packageSignedAt}` : ''}</div>}
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
