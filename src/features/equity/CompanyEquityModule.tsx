@@ -69,7 +69,7 @@ const money = (value: unknown, symbol: string) =>
 
 const percent = (value: unknown) => `${toNumber(value).toFixed(4)}%`;
 
-const fieldClass = 'w-full px-3 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-950 dark:text-white font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 placeholder:text-slate-400';
+const fieldClass = 'w-full px-3 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-950 dark:!text-white font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 placeholder:text-slate-400';
 const labelClass = 'text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 block';
 const cardClass = 'bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm';
 const subTextClass = 'text-sm font-medium text-slate-600 dark:text-slate-300';
@@ -303,7 +303,7 @@ function SigningPackagePreview({ record, companyName, currencySymbol }: { record
   return (
     <div className="rounded-[28px] border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 p-3 sm:p-5">
       <div className="rounded-[24px] bg-white dark:bg-slate-950 shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
-        <div className="bg-slate-950 text-white p-6 sm:p-8">
+        <div className="bg-slate-950 !text-white p-6 sm:p-8">
           <div className="text-[11px] font-black uppercase tracking-[0.22em] text-blue-300">{companyName || 'Company'}</div>
           <h3 className="mt-2 text-3xl font-black leading-tight">{record.packageTitle || 'Private Investment Reservation'}</h3>
           <div className="mt-3 text-sm font-semibold text-slate-300">Prepared for {displayName}{record.packageExpirationDate ? ` • expires ${record.packageExpirationDate}` : ''}</div>
@@ -314,12 +314,12 @@ function SigningPackagePreview({ record, companyName, currencySymbol }: { record
             {paragraphize(record.packagePrivateMessage || 'Please review the terms below. This is an indication-of-interest package, not final investment acceptance.').map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Investor</div><div className="font-black text-slate-950 dark:text-white">{displayName}</div></div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Entity</div><div className="font-black text-slate-950 dark:text-white">{record.entityName || 'Individual / not entered'}</div></div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Instrument</div><div className="font-black text-slate-950 dark:text-white">{formatInstrument(record.instrumentType)}</div></div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Desired amount</div><div className="font-black text-slate-950 dark:text-white">{money(record.desiredAmount, currencySymbol)}</div></div>
-            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Indicative price/share</div><div className="font-black text-slate-950 dark:text-white">{money(record.packagePricePerShare, currencySymbol)}</div></div>}
-            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Estimated shares</div><div className="font-black text-slate-950 dark:text-white">{estimatedShares.toLocaleString()}</div></div>}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Investor</div><div className="font-black text-slate-950 dark:!text-white">{displayName}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Entity</div><div className="font-black text-slate-950 dark:!text-white">{record.entityName || 'Individual / not entered'}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Instrument</div><div className="font-black text-slate-950 dark:!text-white">{formatInstrument(record.instrumentType)}</div></div>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Desired amount</div><div className="font-black text-slate-950 dark:!text-white">{money(record.desiredAmount, currencySymbol)}</div></div>
+            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Indicative price/share</div><div className="font-black text-slate-950 dark:!text-white">{money(record.packagePricePerShare, currencySymbol)}</div></div>}
+            {record.instrumentType === 'common_stock' && <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Estimated shares</div><div className="font-black text-slate-950 dark:!text-white">{estimatedShares.toLocaleString()}</div></div>}
           </div>
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Offering summary</div>{summary.map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}</div>
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4"><div className={labelClass}>Major terms</div>{terms.map((line, idx) => <p key={idx} className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{line}</p>)}</div>
@@ -332,10 +332,10 @@ function SigningPackagePreview({ record, companyName, currencySymbol }: { record
           </div>
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
             <div className={labelClass}>Typed signature preview</div>
-            <div className="h-20 border-b-2 border-slate-900 dark:border-slate-200 flex items-end pb-2 font-serif text-2xl text-slate-950 dark:text-white">{record.signatureName || displayName}</div>
+            <div className="h-20 border-b-2 border-slate-900 dark:border-slate-200 flex items-end pb-2 font-serif text-2xl text-slate-950 dark:!text-white">{record.signatureName || displayName}</div>
             <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Future online portal will capture submit timestamp and audit details. This v32.2 preview does not replace a securities portal.</div>
           </div>
-          <button type="button" className="w-full rounded-2xl bg-blue-600 text-white font-black px-5 py-4 flex items-center justify-center gap-2"><PenLine size={18}/> Submit reservation — preview only</button>
+          <button type="button" className="w-full rounded-2xl bg-blue-600 !text-white font-black px-5 py-4 flex items-center justify-center gap-2"><PenLine size={18}/> Submit reservation — preview only</button>
         </div>
       </div>
     </div>
@@ -348,7 +348,7 @@ function SummaryCard({ label, value, note, icon }: { label: string; value: strin
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
-          <div className="mt-1 text-2xl font-black text-slate-950 dark:text-white">{value}</div>
+          <div className="mt-1 text-2xl font-black text-slate-950 dark:!text-white">{value}</div>
         </div>
         <div className="rounded-xl bg-blue-50 dark:bg-blue-500/10 p-2 text-blue-600 dark:text-blue-300">{icon}</div>
       </div>
@@ -840,10 +840,13 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
     downloadText(`moniezi_investment_reservations_${todayIso()}.csv`, toCsv(rows));
   };
 
-  const navItems: Array<{ id: EquitySection; label: string }> = [
+  const primaryNavItems: Array<{ id: EquitySection; label: string }> = [
     { id: 'guide', label: 'Guide' },
     { id: 'issuance', label: 'Issue Shares' },
     { id: 'packages', label: 'Investor Packages' },
+  ];
+
+  const secondaryNavItems: Array<{ id: EquitySection; label: string }> = [
     { id: 'reservations', label: 'Reservations' },
     { id: 'stakeholders', label: 'Stakeholders' },
     { id: 'captable', label: 'Cap Table' },
@@ -859,7 +862,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <Landmark size={24} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-white font-brand">Company Equity Register</h1>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:!text-white font-brand">Company Equity Register</h1>
             <p className={subTextClass}>Internal founder/business module for stakeholders, share issuances, investment reservations, SAFEs, and cap table summaries.</p>
           </div>
         </div>
@@ -867,7 +870,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
           <button onClick={() => setActiveSection('settings')} className="rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-3 text-sm font-black text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900 flex items-center gap-2">
             <Shield size={16} /> Equity Settings
           </button>
-          <button onClick={loadDemoData} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 text-sm font-black flex items-center gap-2 shadow-lg shadow-blue-600/20">
+          <button onClick={loadDemoData} className="rounded-xl bg-blue-600 hover:bg-blue-700 !text-white px-4 py-3 text-sm font-black flex items-center gap-2 shadow-lg shadow-blue-600/20">
             <FileText size={16} /> Load Demo Equity
           </button>
         </div>
@@ -888,28 +891,56 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 shadow-sm">
-        <div className="flex min-w-max gap-2">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all ${
-                activeSection === item.id
-                  ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 shadow-sm">
+          <div className="grid grid-cols-3 gap-1">
+            {primaryNavItems.map(item => {
+              const active = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveSection(item.id)}
+                  aria-pressed={active}
+                  className={`min-h-[3.25rem] rounded-xl px-2 text-center text-[13px] sm:text-sm font-black leading-tight transition-all ${
+                    active
+                      ? '!bg-slate-950 !text-white dark:!bg-white dark:!text-slate-950 shadow-md shadow-slate-950/10 dark:shadow-black/30'
+                      : '!bg-transparent !text-slate-950 dark:!text-slate-100 hover:!bg-slate-100 dark:hover:!bg-slate-900'
+                  }`}
+                >
+                  <span className="block whitespace-normal">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2" aria-label="Additional equity sections">
+          {secondaryNavItems.map(item => {
+            const active = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveSection(item.id)}
+                aria-pressed={active}
+                className={`rounded-full border px-3 py-2 text-xs font-black transition-all ${
+                  active
+                    ? '!border-blue-600 !bg-blue-600 !text-white dark:!border-blue-400 dark:!bg-blue-400 dark:!text-slate-950 shadow-sm'
+                    : '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-950 !text-slate-800 dark:!text-slate-200 hover:!bg-slate-50 dark:hover:!bg-slate-900'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {activeSection === 'guide' && (
         <section className={`${cardClass} p-5 space-y-5`}>
           <div>
-            <h2 className="text-xl font-black text-slate-950 dark:text-white">Plain-English Workflow</h2>
+            <h2 className="text-xl font-black text-slate-950 dark:!text-white">Plain-English Workflow</h2>
             <p className={subTextClass}>Use this order when you want to track who received shares and how much they paid.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
@@ -921,19 +952,19 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
               ['5', 'Track reservations separately', 'Reservations are interest/commitments only. They are not issued shares until you record an issuance.'],
             ].map(([num, title, body]) => (
               <div key={num} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4">
-                <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">{num}</div>
-                <div className="mt-3 text-base font-black text-slate-950 dark:text-white">{title}</div>
+                <div className="h-8 w-8 rounded-full bg-blue-600 !text-white flex items-center justify-center font-black">{num}</div>
+                <div className="mt-3 text-base font-black text-slate-950 dark:!text-white">{title}</div>
                 <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">{body}</p>
               </div>
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-              <h3 className="font-black text-slate-950 dark:text-white">Where do I record paid shares?</h3>
+              <h3 className="font-black text-slate-950 dark:!text-white">Where do I record paid shares?</h3>
               <p className={subTextClass}>Use <b>Issue Shares</b>. The amount paid is calculated as <b>shares × price per share</b>. Example: 200,000 shares × $0.25 = $50,000 paid.</p>
             </div>
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-              <h3 className="font-black text-slate-950 dark:text-white">Are investors equal stakeholders?</h3>
+              <h3 className="font-black text-slate-950 dark:!text-white">Are investors equal stakeholders?</h3>
               <p className={subTextClass}>Only if they hold the same share class and the same number of outstanding shares. Same cash amount at the same price/share usually creates equal ownership; different amounts create different ownership.</p>
             </div>
           </div>
@@ -943,7 +974,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
       {activeSection === 'settings' && (
         <section className={`${cardClass} p-5 space-y-6`}>
           <div>
-            <h2 className="text-xl font-black text-slate-950 dark:text-white">Equity Settings</h2>
+            <h2 className="text-xl font-black text-slate-950 dark:!text-white">Equity Settings</h2>
             <p className={subTextClass}>Company profile and share classes. This is the setup area you asked for.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -957,7 +988,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
           <div className="border-t border-slate-200 dark:border-slate-800 pt-5">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
-                <h3 className="text-lg font-black text-slate-950 dark:text-white">Share Classes</h3>
+                <h3 className="text-lg font-black text-slate-950 dark:!text-white">Share Classes</h3>
                 <p className={subTextClass}>Start with common stock. Add preferred stock only if your company actually uses it.</p>
               </div>
             </div>
@@ -965,14 +996,14 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
               <Field label="Class name"><input className={fieldClass} value={shareClassDraft.name || ''} onChange={e => setShareClassDraft(p => ({ ...p, name: e.target.value }))} placeholder="Common Stock" /></Field>
               <Field label="Authorized shares"><input className={fieldClass} type="number" inputMode="numeric" value={shareClassDraft.authorizedShares || ''} onChange={e => setShareClassDraft(p => ({ ...p, authorizedShares: toNumber(e.target.value) }))} /></Field>
               <Field label="Par value"><input className={fieldClass} type="number" inputMode="decimal" step="0.0001" value={shareClassDraft.parValue || ''} onChange={e => setShareClassDraft(p => ({ ...p, parValue: toNumber(e.target.value) }))} /></Field>
-              <div className="flex items-end"><button onClick={saveShareClass} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingShareClassId ? 'Update Class' : 'Add Class'}</button></div>
+              <div className="flex items-end"><button onClick={saveShareClass} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingShareClassId ? 'Update Class' : 'Add Class'}</button></div>
               <div className="md:col-span-4"><Field label="Description"><input className={fieldClass} value={shareClassDraft.description || ''} onChange={e => setShareClassDraft(p => ({ ...p, description: e.target.value }))} placeholder="Founder/common shares, preferred investor class, etc." /></Field></div>
             </div>
             <div className="space-y-2">
               {state.shareClasses.map(c => (
                 <div key={c.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="font-black text-slate-950 dark:text-white">{c.name}</div>
+                    <div className="font-black text-slate-950 dark:!text-white">{c.name}</div>
                     <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{formatShares(c.authorizedShares)} authorized • par {money(c.parValue, currencySymbol)}</div>
                     {c.description && <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">{c.description}</div>}
                   </div>
@@ -987,7 +1018,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
       {activeSection === 'stakeholders' && (
         <section className={`${cardClass} p-5 space-y-5`}>
           <div>
-            <h2 className="text-xl font-black text-slate-950 dark:text-white">Stakeholders</h2>
+            <h2 className="text-xl font-black text-slate-950 dark:!text-white">Stakeholders</h2>
             <p className={subTextClass}>A stakeholder is a person/entity record. They become a shareholder only after you record an issued-share transaction.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
@@ -995,14 +1026,14 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <Field label="Type"><select className={fieldClass} value={stakeholderDraft.type || 'investor'} onChange={e => setStakeholderDraft(p => ({ ...p, type: e.target.value as EquityStakeholderType }))}><option value="founder">Founder</option><option value="investor">Investor</option><option value="advisor">Advisor</option><option value="employee">Employee/Contractor</option><option value="entity">Entity/LLC</option><option value="other">Other</option></select></Field>
             <Field label="Email"><input className={fieldClass} value={stakeholderDraft.email || ''} onChange={e => setStakeholderDraft(p => ({ ...p, email: e.target.value }))} placeholder="email@example.com" /></Field>
             <Field label="Address"><input className={fieldClass} value={stakeholderDraft.address || ''} onChange={e => setStakeholderDraft(p => ({ ...p, address: e.target.value }))} placeholder="Optional" /></Field>
-            <div className="flex items-end"><button onClick={saveStakeholder} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingStakeholderId ? 'Update' : 'Add'}</button></div>
+            <div className="flex items-end"><button onClick={saveStakeholder} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingStakeholderId ? 'Update' : 'Add'}</button></div>
             <div className="md:col-span-5"><Field label="Notes"><input className={fieldClass} value={stakeholderDraft.notes || ''} onChange={e => setStakeholderDraft(p => ({ ...p, notes: e.target.value }))} placeholder="Internal notes about this stakeholder" /></Field></div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {state.stakeholders.length === 0 ? <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">No stakeholders yet. Add at least one stakeholder before recording shares.</div> : state.stakeholders.map(s => (
               <div key={s.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-start justify-between gap-3">
                 <div>
-                  <div className="font-black text-slate-950 dark:text-white">{s.name}</div>
+                  <div className="font-black text-slate-950 dark:!text-white">{s.name}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-2"><span className={statusPillClass('slate')}>{s.type}</span>{s.email && <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{s.email}</span>}</div>
                   {s.notes && <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{s.notes}</p>}
                 </div>
@@ -1017,16 +1048,16 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
         <section className={`${cardClass} p-5 space-y-5`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black text-slate-950 dark:text-white">Guided Share Issuance</h2>
+              <h2 className="text-xl font-black text-slate-950 dark:!text-white">Guided Share Issuance</h2>
               <p className={subTextClass}>This is the exact place to record who received shares, how many shares, and what they paid.</p>
             </div>
             <button onClick={exportLedgerCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> Stock Ledger CSV</button>
           </div>
 
           <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Selected recipient</div><div className="mt-1 font-black text-slate-950 dark:text-white">{selectedHolder?.name || 'Not selected'}</div></div>
-            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Share class</div><div className="mt-1 font-black text-slate-950 dark:text-white">{selectedShareClass?.name || 'Not selected'}</div></div>
-            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Amount paid calculation</div><div className="mt-1 font-black text-slate-950 dark:text-white">{money(issuancePaidAmount, currencySymbol)}</div><div className="text-xs font-semibold text-slate-500 dark:text-slate-400">shares × price/share</div></div>
+            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Selected recipient</div><div className="mt-1 font-black text-slate-950 dark:!text-white">{selectedHolder?.name || 'Not selected'}</div></div>
+            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Share class</div><div className="mt-1 font-black text-slate-950 dark:!text-white">{selectedShareClass?.name || 'Not selected'}</div></div>
+            <div><div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Amount paid calculation</div><div className="mt-1 font-black text-slate-950 dark:!text-white">{money(issuancePaidAmount, currencySymbol)}</div><div className="text-xs font-semibold text-slate-500 dark:text-slate-400">shares × price/share</div></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -1044,7 +1075,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <div className="md:col-span-2"><Field label="Vesting terms"><input className={fieldClass} value={issuanceDraft.vestingTerms || ''} onChange={e => setIssuanceDraft(p => ({ ...p, vestingTerms: e.target.value }))} placeholder="No vesting, or four-year vesting placeholder" /></Field></div>
             <div className="md:col-span-2"><Field label="Restriction legend"><input className={fieldClass} value={issuanceDraft.restrictionLegend || ''} onChange={e => setIssuanceDraft(p => ({ ...p, restrictionLegend: e.target.value }))} placeholder="Restricted securities legend placeholder" /></Field></div>
             <div className="md:col-span-3"><Field label="Notes"><input className={fieldClass} value={issuanceDraft.notes || ''} onChange={e => setIssuanceDraft(p => ({ ...p, notes: e.target.value }))} placeholder="Internal record note" /></Field></div>
-            <div className="flex items-end"><button onClick={saveIssuance} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingIssuanceId ? 'Update Issuance' : 'Record Issuance'}</button></div>
+            <div className="flex items-end"><button onClick={saveIssuance} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingIssuanceId ? 'Update Issuance' : 'Record Issuance'}</button></div>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
@@ -1054,7 +1085,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
                 {state.issuances.length === 0 ? <tr><td colSpan={9} className="px-3 py-6 text-center font-semibold text-slate-500">No issuances recorded yet.</td></tr> : state.issuances.map(i => {
                   const holder = state.stakeholders.find(s => s.id === i.stakeholderId);
                   const cls = state.shareClasses.find(c => c.id === i.shareClassId);
-                  return <tr key={i.id}><td className="px-3 py-3 font-semibold">{i.issueDate}</td><td className="px-3 py-3 font-bold text-slate-950 dark:text-white">{holder?.name || 'Unassigned'}</td><td className="px-3 py-3">{cls?.name || 'Unassigned'}</td><td className="px-3 py-3">{formatShares(i.shares)}</td><td className="px-3 py-3">{money(i.pricePerShare, currencySymbol)}</td><td className="px-3 py-3 font-bold">{money(i.shares * i.pricePerShare, currencySymbol)}</td><td className="px-3 py-3">{i.certificateNumber || '—'}</td><td className="px-3 py-3"><span className={statusPillClass(issuanceTone(i.status))}>{i.status}</span></td><td className="px-3 py-3 text-right"><button onClick={() => editIssuance(i)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><Edit3 size={16}/></button><button onClick={() => deleteIssuance(i.id)} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16}/></button></td></tr>;
+                  return <tr key={i.id}><td className="px-3 py-3 font-semibold">{i.issueDate}</td><td className="px-3 py-3 font-bold text-slate-950 dark:!text-white">{holder?.name || 'Unassigned'}</td><td className="px-3 py-3">{cls?.name || 'Unassigned'}</td><td className="px-3 py-3">{formatShares(i.shares)}</td><td className="px-3 py-3">{money(i.pricePerShare, currencySymbol)}</td><td className="px-3 py-3 font-bold">{money(i.shares * i.pricePerShare, currencySymbol)}</td><td className="px-3 py-3">{i.certificateNumber || '—'}</td><td className="px-3 py-3"><span className={statusPillClass(issuanceTone(i.status))}>{i.status}</span></td><td className="px-3 py-3 text-right"><button onClick={() => editIssuance(i)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><Edit3 size={16}/></button><button onClick={() => deleteIssuance(i.id)} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16}/></button></td></tr>;
                 })}
               </tbody>
             </table>
@@ -1065,10 +1096,10 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
       {activeSection === 'captable' && (
         <section className={`${cardClass} p-5 space-y-4`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div><h2 className="text-xl font-black text-slate-950 dark:text-white">Cap Table Summary</h2><p className={subTextClass}>Calculated from active issued share records. SAFE records and reservations are not counted until converted into shares.</p></div>
+            <div><h2 className="text-xl font-black text-slate-950 dark:!text-white">Cap Table Summary</h2><p className={subTextClass}>Calculated from active issued share records. SAFE records and reservations are not counted until converted into shares.</p></div>
             <button onClick={exportCapTableCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> Cap Table CSV</button>
           </div>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800"><table className="w-full min-w-[760px] text-sm"><thead className="bg-slate-50 dark:bg-slate-900"><tr>{['Stakeholder','Type','Class','Shares','Ownership','Cash Paid'].map(h => <th key={h} className="px-3 py-3 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-200 dark:divide-slate-800">{capRows.length === 0 ? <tr><td colSpan={6} className="px-3 py-6 text-center font-semibold text-slate-500">No outstanding issued shares yet.</td></tr> : capRows.map(row => <tr key={`${row.stakeholderId}-${row.shareClassId}`}><td className="px-3 py-3 font-black text-slate-950 dark:text-white">{row.stakeholderName}</td><td className="px-3 py-3 capitalize">{row.stakeholderType}</td><td className="px-3 py-3">{row.shareClassName}</td><td className="px-3 py-3">{formatShares(row.shares)}</td><td className="px-3 py-3 font-bold">{percent(row.ownershipPct)}</td><td className="px-3 py-3">{money(row.cashPaid, currencySymbol)}</td></tr>)}</tbody></table></div>
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800"><table className="w-full min-w-[760px] text-sm"><thead className="bg-slate-50 dark:bg-slate-900"><tr>{['Stakeholder','Type','Class','Shares','Ownership','Cash Paid'].map(h => <th key={h} className="px-3 py-3 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-200 dark:divide-slate-800">{capRows.length === 0 ? <tr><td colSpan={6} className="px-3 py-6 text-center font-semibold text-slate-500">No outstanding issued shares yet.</td></tr> : capRows.map(row => <tr key={`${row.stakeholderId}-${row.shareClassId}`}><td className="px-3 py-3 font-black text-slate-950 dark:!text-white">{row.stakeholderName}</td><td className="px-3 py-3 capitalize">{row.stakeholderType}</td><td className="px-3 py-3">{row.shareClassName}</td><td className="px-3 py-3">{formatShares(row.shares)}</td><td className="px-3 py-3 font-bold">{percent(row.ownershipPct)}</td><td className="px-3 py-3">{money(row.cashPaid, currencySymbol)}</td></tr>)}</tbody></table></div>
         </section>
       )}
 
@@ -1076,7 +1107,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
         <section className={`${cardClass} p-5 space-y-6`}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black text-slate-950 dark:text-white">Investor Link Drafting + Signing Package Preview</h2>
+              <h2 className="text-xl font-black text-slate-950 dark:!text-white">Investor Link Drafting + Signing Package Preview</h2>
               <p className={subTextClass}>Draft a DocuSign-style private reservation page for family/friends investors. In v32.2 this creates the owner-side package, preview, placeholder link, invitation text, and downloadable HTML preview.</p>
             </div>
             <button onClick={() => setPackageDraft(emptyInvestorPackage(companyName))} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Plus size={16}/> New Package</button>
@@ -1093,7 +1124,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-black text-slate-950 dark:text-white">Package details</h3>
+                  <h3 className="font-black text-slate-950 dark:!text-white">Package details</h3>
                   <p className={subTextClass}>{editingPackageId ? 'Editing saved package.' : 'Create a new invitation/reservation package.'}</p>
                 </div>
                 {editingPackageId && <span className={statusPillClass(packageStatusTone(packageDraft.packageStatus as EquityInvestorPackageStatus | undefined))}>{packageStatusLabel(packageDraft.packageStatus as EquityInvestorPackageStatus | undefined)}</span>}
@@ -1121,7 +1152,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button onClick={saveInvestorPackage} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><FileText size={16}/>{editingPackageId ? 'Update Package' : 'Save Draft Package'}</button>
+                <button onClick={saveInvestorPackage} className="rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><FileText size={16}/>{editingPackageId ? 'Update Package' : 'Save Draft Package'}</button>
                 <button onClick={() => previewInvestorPackage()} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Eye size={16}/> Preview Page</button>
                 <button onClick={() => copyInvitation(draftPreviewRecord())} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Copy size={16}/> Copy Invite Text</button>
                 <button onClick={() => downloadPackageHtml(draftPreviewRecord())} className="rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Download size={16}/> Download HTML Preview</button>
@@ -1141,7 +1172,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="font-black text-slate-950 dark:text-white">Saved Investor Packages</h3>
+                <h3 className="font-black text-slate-950 dark:!text-white">Saved Investor Packages</h3>
                 <p className={subTextClass}>These records are also part of the Reservations tracker, but this view focuses on invitation/link/signing workflow status.</p>
               </div>
             </div>
@@ -1151,7 +1182,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
               <div key={r.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div>
-                    <div className="font-black text-slate-950 dark:text-white">{r.investorName} • {money(r.desiredAmount, currencySymbol)}</div>
+                    <div className="font-black text-slate-950 dark:!text-white">{r.investorName} • {money(r.desiredAmount, currencySymbol)}</div>
                     <div className="mt-1 flex flex-wrap items-center gap-2"><span className={statusPillClass(packageStatusTone(r.packageStatus))}>{packageStatusLabel(r.packageStatus)}</span><span className={statusPillClass('slate')}>{formatInstrument(r.instrumentType)}</span>{r.email && <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{r.email}</span>}</div>
                     <div className="mt-2 break-all text-xs font-semibold text-slate-500 dark:text-slate-400">{packageLinkFor(r)}</div>
                   </div>
@@ -1178,7 +1209,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
       {activeSection === 'reservations' && (
         <section className={`${cardClass} p-5 space-y-5`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div><h2 className="text-xl font-black text-slate-950 dark:text-white">Investment Reservation Tracker</h2><p className={subTextClass}>Internal tracker for indications of interest. These are not issued shares and are not counted in ownership.</p></div>
+            <div><h2 className="text-xl font-black text-slate-950 dark:!text-white">Investment Reservation Tracker</h2><p className={subTextClass}>Internal tracker for indications of interest. These are not issued shares and are not counted in ownership.</p></div>
             <button onClick={exportReservationsCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> Reservations CSV</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -1193,13 +1224,13 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <Field label="Follow-up date"><input className={fieldClass} type="date" value={reservationDraft.followUpDate || ''} onChange={e => setReservationDraft(p => ({ ...p, followUpDate: e.target.value }))} /></Field>
             <Field label="Typed signature/name"><input className={fieldClass} value={reservationDraft.signatureName || ''} onChange={e => setReservationDraft(p => ({ ...p, signatureName: e.target.value }))} placeholder="Optional" /></Field>
             <div className="md:col-span-2"><Field label="Notes"><input className={fieldClass} value={reservationDraft.notes || ''} onChange={e => setReservationDraft(p => ({ ...p, notes: e.target.value }))} placeholder="What did they commit/reserve? Follow-up notes." /></Field></div>
-            <div className="md:col-span-4"><button onClick={saveReservation} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingReservationId ? 'Update Reservation' : 'Record Reservation'}</button></div>
+            <div className="md:col-span-4"><button onClick={saveReservation} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingReservationId ? 'Update Reservation' : 'Record Reservation'}</button></div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {state.reservations.length === 0 ? <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">No reservations yet.</div> : state.reservations.map(r => (
               <div key={r.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-start justify-between gap-3">
                 <div>
-                  <div className="font-black text-slate-950 dark:text-white">{r.investorName} • {money(r.desiredAmount, currencySymbol)}</div>
+                  <div className="font-black text-slate-950 dark:!text-white">{r.investorName} • {money(r.desiredAmount, currencySymbol)}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-2"><span className={statusPillClass(reservationTone(r.status))}>{r.status}</span><span className={statusPillClass('slate')}>{formatInstrument(r.instrumentType)}</span>{r.email && <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{r.email}</span>}</div>
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-2">{r.date}{r.followUpDate ? ` • follow up ${r.followUpDate}` : ''}{r.entityName ? ` • ${r.entityName}` : ''}</div>
                   {r.notes && <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{r.notes}</p>}
@@ -1213,7 +1244,7 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
 
       {activeSection === 'safes' && (
         <section className={`${cardClass} p-5 space-y-5`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 className="text-xl font-black text-slate-950 dark:text-white">SAFE / Convertible Instrument Tracker</h2><p className={subTextClass}>SAFEs are investments that do not become issued shares until conversion. Keep them separate from the stock ledger.</p></div><button onClick={exportSafesCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> SAFE CSV</button></div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 className="text-xl font-black text-slate-950 dark:!text-white">SAFE / Convertible Instrument Tracker</h2><p className={subTextClass}>SAFEs are investments that do not become issued shares until conversion. Keep them separate from the stock ledger.</p></div><button onClick={exportSafesCsv} className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-extrabold flex items-center gap-2"><Download size={16}/> SAFE CSV</button></div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Field label="Date"><input className={fieldClass} type="date" value={safeDraft.date || todayIso()} onChange={e => setSafeDraft(p => ({ ...p, date: e.target.value }))} /></Field>
             <Field label="Linked stakeholder"><select className={fieldClass} value={safeDraft.investorId || ''} onChange={e => { const investor = state.stakeholders.find(s => s.id === e.target.value); setSafeDraft(p => ({ ...p, investorId: e.target.value, investorName: investor?.name || p.investorName || '' })); }}><option value="">No linked stakeholder</option>{state.stakeholders.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
@@ -1225,9 +1256,9 @@ export function CompanyEquityModule({ equity, onChange, currencySymbol, defaultB
             <Field label="Status"><select className={fieldClass} value={safeDraft.status || 'active'} onChange={e => setSafeDraft(p => ({ ...p, status: e.target.value as EquitySafeStatus }))}><option value="active">Active</option><option value="converted">Converted</option><option value="cancelled">Cancelled</option></select></Field>
             <label className="rounded-xl border border-slate-300 dark:border-slate-700 px-3 py-3 flex items-center gap-2 font-bold"><input type="checkbox" checked={!!safeDraft.mfn} onChange={e => setSafeDraft(p => ({ ...p, mfn: e.target.checked }))}/> MFN</label>
             <div className="md:col-span-2"><Field label="Notes"><input className={fieldClass} value={safeDraft.notes || ''} onChange={e => setSafeDraft(p => ({ ...p, notes: e.target.value }))} placeholder="Internal notes" /></Field></div>
-            <div className="flex items-end"><button onClick={saveSafe} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingSafeId ? 'Update SAFE' : 'Add SAFE'}</button></div>
+            <div className="flex items-end"><button onClick={saveSafe} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 !text-white font-extrabold px-4 py-3 flex items-center justify-center gap-2"><Plus size={16}/>{editingSafeId ? 'Update SAFE' : 'Add SAFE'}</button></div>
           </div>
-          <div className="space-y-2">{state.safes.length === 0 ? <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">No SAFE records yet.</div> : state.safes.map(s => <div key={s.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex items-center justify-between gap-3"><div><div className="font-black text-slate-950 dark:text-white">{s.investorName} • {money(s.amount, currencySymbol)}</div><div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{s.date} • {s.type || 'unknown'} • {s.status}{s.valuationCap ? ` • Cap ${money(s.valuationCap, currencySymbol)}` : ''}</div>{s.notes && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{s.notes}</p>}</div><div className="flex gap-1"><button onClick={() => { setEditingSafeId(s.id); setSafeDraft(s); }} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><Edit3 size={16}/></button><button onClick={() => deleteSafe(s.id)} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16}/></button></div></div>)}</div>
+          <div className="space-y-2">{state.safes.length === 0 ? <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">No SAFE records yet.</div> : state.safes.map(s => <div key={s.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex items-center justify-between gap-3"><div><div className="font-black text-slate-950 dark:!text-white">{s.investorName} • {money(s.amount, currencySymbol)}</div><div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{s.date} • {s.type || 'unknown'} • {s.status}{s.valuationCap ? ` • Cap ${money(s.valuationCap, currencySymbol)}` : ''}</div>{s.notes && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{s.notes}</p>}</div><div className="flex gap-1"><button onClick={() => { setEditingSafeId(s.id); setSafeDraft(s); }} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><Edit3 size={16}/></button><button onClick={() => deleteSafe(s.id)} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 size={16}/></button></div></div>)}</div>
         </section>
       )}
     </div>
